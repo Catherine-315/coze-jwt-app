@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>「辦」識AI 系列 - 從零開始</title>
+    <!-- 引入 Google Fonts：Noto Serif TC (文青襯線體) + Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400&family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
+    <!-- 使用最新的 Coze Chat App SDK CDN -->
+    <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f7f5f0; /* 溫暖的米色/燕麥色文青風背景 */
+            color: #4a4543;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: #ffffff;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(74, 69, 67, 0.06);
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #eae5df;
+        }
+        /* 相片擺放區 */
+        .photo-frame {
+            width: 100%;
+            height: 220px;
+            background-color: #f0ebe1;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px dashed #d6ccc2;
+        }
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-placeholder-text {
+            color: #8c827b;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        /* 文青標題風格 */
+        h1 {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c2725;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        p {
+            font-size: 14px;
+            color: #7d736e;
+            line-height: 1.8;
+            margin-bottom: 24px;
+            font-weight: 300;
+        }
+        .status-badge {
+            display: inline-block;
+            background: #f0ede6;
+            color: #5c534e;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <!-- 相片擺放位置：若要放相片，可將下方 <img> 的 src 換成你的圖片網址或檔名 -->
+        <div class="photo-frame">
+            <!-- 示範：如要放相片，取消下面這行的註釋並填入圖片網址 -->
+            <!-- <img src="你的相片網址.jpg" alt="活動相片"> -->
+            <span class="photo-placeholder-text">🌿 這裡可以放你的活動相片</span>
+        </div>
+
+        <h1>「辦」識AI 系列 - 從零開始：手把手帶你打造專屬 AI Chatbot</h1>
+        
+        <p>喝杯咖啡，慢下來感受科技。有任何關於活動的查詢或想法，歡迎隨時點擊右下角，與小幫手溫柔對話。</p>
+        
+        <div class="status-badge" id="status">正在連結心靈與 AI...</div>
+    </div>
+
+    <script>
+      async function initChat() {
+        const statusEl = document.getElementById('status');
+        try {
+          const res = await fetch('/api/token');
+          const data = await res.json();
+          
+          if (!data.access_token) {
+            statusEl.innerText = "連線未如預期，請重新整理";
+            return;
+          }
+
+          statusEl.innerText = "✨ 準備就緒，右下角隨時傾偈";
+
+          new CozeWebSDK.WebChatClient({
+            config: {
+              bot_id: '7662199682715090949',
+              isIframe: false
+            },
+            componentProps: {
+              title: '活動小幫手',
+            },
+            auth: {
+              type: 'token',
+              token: data.access_token,
+              onRefreshToken: async () => {
+                const refreshRes = await fetch('/api/token');
+                const refreshData = await refreshRes.json();
+                return refreshData.access_token;
+              }
+            },
+            userInfo: {
+              id: data.user_id,
+              nickName: "Catherine",
+            }
+          });
+        } catch (err) {
+          console.error("初始化聊天室失敗：", err);
+          statusEl.innerText = "出了一點小狀況";
+        }
+      }
+
+      initChat();
+    </script>
+</body>
+</html>
